@@ -27,4 +27,4 @@ matches keywords against a document metadata manifest (`assets/assets_meta.priva
 
 ## Example interactions
 Example WhatsApp interaction demonstrating keyword-based SOP retrieval (exact and partial matches handled automatically)  
-![Alt text](images/Twilio_demo.png)
+![Alt text](assets/Twilio_demo.png)
