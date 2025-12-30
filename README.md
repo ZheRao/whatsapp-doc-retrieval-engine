@@ -23,7 +23,7 @@ enhancing safety while minimizing communication overhead.
 ## Architecture
 
 The system is implemented as a Twilio webhook handler that processes inbound messages,
-matches keywords against a document metadata manifest (`assets/assets_meta.private.js`), and returns secure document links.
+matches keywords against a document metadata manifest (`assets/assets_meta.private.js`), and returns document links.
 
 ## Example interactions
 Example WhatsApp interaction demonstrating keyword-based SOP retrieval (exact and partial matches handled automatically)  
