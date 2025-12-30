@@ -26,5 +26,5 @@ The system is implemented as a Twilio webhook handler that processes inbound mes
 matches keywords against a document metadata manifest (`assets/assets_meta.private.js`), and returns secure document links.
 
 ## Example interactions
-Example WhatsApp interaction demonstrating keyword-based SOP retrieval (exact and partial matches handled automatically)
+Example WhatsApp interaction demonstrating keyword-based SOP retrieval (exact and partial matches handled automatically)  
 ![Alt text](images/Twilio_demo.png)
