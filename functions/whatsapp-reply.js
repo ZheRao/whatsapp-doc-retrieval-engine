@@ -31,8 +31,19 @@ exports.handler = function (context, event, callback) {
 
 
     const lines = [];
+    const MAX_RESULTS = 8;
 
-    if (body.includes("shit") || body.includes("fuck")) {
+    // function to normalize text
+    function norm(s) {
+        return (s ?? "")
+            .toLowerCase()
+            .split('/').pop()        // drop any path and leading '/'
+            .replace(/\.pdf$/i, '')  // drop extension
+            .replace(/[^a-z0-9]/g, ''); // remove spaces, underscores, punctuation
+    }
+
+
+    if (body.includes("shit") || body.includes("fuck") || body.includes("WTF") || body.includes("suck")) {
         lines.push("Heyyyyyy - let's be professional shall we? 🫣😆🫠");
         lines.push("");
         lines.push("But here are the results - ");
@@ -41,10 +52,12 @@ exports.handler = function (context, event, callback) {
     
     if (body.includes("show") && body.includes("list")) {
         lines.push("Here is the doc that contains a list of SOP for you to look up");
+        lines.push("");
         lines.push("You just need to enter keywords on the document name");
         lines.push("");
         lines.push("------------------------");
-        lines.push("list document URL here");
+        lines.push("Name: Monette Farms Master File List");
+        lines.push("Link: https://sop-docs-7521.twil.io/Monette_Farms_Master_File_List.pdf");
         lines.push("------------------------");
         lines.push("");
         lines.push("A friendly reminder: The format for requesting the document is");
@@ -57,13 +70,16 @@ exports.handler = function (context, event, callback) {
     } else if (body.startsWith("get")&&body.includes("-")) {
 
         // extract key words
-        const keywords = body.split("-")[1].split(",");
+        const keywords = body.split("-")[1]
+        .split(",")
+        .map(k => k.trim())
+        .filter(k => k.length > 0);
+
         if (keywords[0] == "") {
             lines.push(`👋 Hi ${profileName}, Please enter at least one keyworde`);
             lines.push("");
 
         } else {
-
             // load assets 
             const assets = Runtime.getAssets();
             const metaAsset = assets['/assets_meta.js'];
@@ -72,19 +88,21 @@ exports.handler = function (context, event, callback) {
             const manifest = JSON.parse(manifestRaw);
             const intersections = [];
             const unions = [];
+            const seen = new Set();       // to keep union items distinct
             let keep_unions = true;
 
             // iterate through each document to determine the closeness of the each title compared to keywrods
             for (let i = 0; i < manifest.length; i++) {
                 const file_name = manifest[i].path;     // e.g., /Monette_Farms_SOP_Seed_Treatment_Inoculant.pdf
-                const file_name_match = file_name.toLowerCase();
-                const display_name = file_name.replace('/Monette_Farms_SOP_', '').replace('.pdf', '').replace(/_/g,' ');     // curate and append only if intersect or union
+                const file_name_match = norm(file_name);
+                const display_name = file_name.split('/').pop().replace('Monette_Farms_SOP_', '').replace('.pdf', '').replace(/_/g,' ');  // curate and append only if intersect or union
                 const file_url = manifest[i].url;
                 let score = 0;
 
                 // iterate through each keyword and determine number of keywords that matched with the title
                 for (let j = 0; j < keywords.length; j++) {
-                    if (file_name_match.includes(keywords[j].trim())) {
+                    const kw = norm(keywords[j])
+                    if (file_name_match.includes(kw)) {
                         score++; 
                     }  
                 }
@@ -101,6 +119,9 @@ exports.handler = function (context, event, callback) {
                 } else if (score > 0) {
                     // if union, and if there wasn't an intersection before, push current file to union - if there were intersection, no point in computing union
                     if (keep_unions) {
+                        const key = file_url;
+                        if (seen.has(key)) continue;
+                        seen.add(key)
                         unions.push({
                             name: display_name,
                             url: file_url,
@@ -116,6 +137,7 @@ exports.handler = function (context, event, callback) {
             if (keep_unions === false) {
                 // this is exact intersection set
                 lines.push("We found exact matches to your keywords! ");
+                lines.push("");
                 lines.push("Here are the results: ");
                 lines.push("");
                 lines.push("------------------------");
@@ -131,14 +153,18 @@ exports.handler = function (context, event, callback) {
             } else if (unions.length > 0) {
                 // this is partial matches
                 const unions2 = unions.sort((a, b) => b.score - a.score); // a should come first if a has larger value -> compare function must be negative -> b - a works
+                const unions3 = unions2.slice(0, MAX_RESULTS);  // truncate results to avoid unable to respond
                 lines.push("We could only find partial matches to your keywords");
+                lines.push("");
+                lines.push(`We found ${unions.length} matches. Showing ${unions3.length}.`);
+                lines.push("");
                 lines.push("Here are the docs containing matching keywords, sorting by descending relevancy: ");
                 lines.push("");
                 lines.push("------------------------");
-                for (let i = 0; i < unions2.length; i++) {
+                for (let i = 0; i < unions3.length; i++) {
                     lines.push("");
-                    lines.push(`Name: ${unions2[i].name}`);
-                    lines.push(`Link: ${unions2[i].url}`);
+                    lines.push(`Name: ${unions3[i].name}`);
+                    lines.push(`Link: ${unions3[i].url}`);
 
                 }
                 lines.push("");
@@ -153,6 +179,10 @@ exports.handler = function (context, event, callback) {
         } 
 
 
+    } else if (body.includes("thank")) {
+    
+        lines.push(`😊😊 You are very welcome ${profileName}, have a wonderful day!`);
+    
     } else {
 
 

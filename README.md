@@ -113,6 +113,8 @@ The system therefore prioritizes **predictability, explainability, and auditabil
 - No fuzzy or semantic matching
 - Cannot infer intent beyond provided keywords
 
+> Search results are intentionally truncated to a fixed maximum to guarantee WhatsApp delivery limits and predictable operator experience.
+
 ## Example interactions
 Example WhatsApp interaction demonstrating keyword-based SOP retrieval (exact and partial matches handled automatically)  
 ![Alt text](assets/Twilio_demo.png)
