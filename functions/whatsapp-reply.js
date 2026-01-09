@@ -57,7 +57,7 @@ exports.handler = function (context, event, callback) {
         lines.push("");
         lines.push("------------------------");
         lines.push("Name: Monette Farms Master File List");
-        lines.push("Link: https://sop-docs-7521.twil.io/Monette_Farms_Master_File_List.pdf");
+        lines.push("Link: https://sop-docs-5843.twil.io/Monette_Farms_Master_File_List.pdf");
         lines.push("------------------------");
         lines.push("");
         lines.push("A friendly reminder: The format for requesting the document is");
@@ -85,11 +85,42 @@ exports.handler = function (context, event, callback) {
             const metaAsset = assets['/assets_meta.js'];
             const fs = require('fs');
             const manifestRaw = fs.readFileSync(metaAsset.path, 'utf8');
-            const manifest = JSON.parse(manifestRaw);
+            const manifestRaw2 = JSON.parse(manifestRaw);
             const intersections = [];
             const unions = [];
             const seen = new Set();       // to keep union items distinct
             let keep_unions = true;
+
+            // make sure that Master List is never shown
+
+            const NEVER_SHOW_PATH = "/Monette_Farms_Master_File_List.pdf"; // !!!!!! update master file path here
+
+            function dropNeverShow(m) {
+            // Case 1: manifest is an array
+            if (Array.isArray(m)) {
+                return m.filter(a =>
+                a?.path !== NEVER_SHOW_PATH 
+                );
+            }
+
+            // Case 2: manifest is an object with assets array
+            if (m && Array.isArray(m.assets)) {
+                m.assets = m.assets.filter(a =>
+                a?.path !== NEVER_SHOW_PATH 
+                );
+                return m;
+            }
+
+            // Unknown shape; leave as-is
+            return m;
+            }
+
+            const manifest = dropNeverShow(manifestRaw2);
+
+
+
+
+
 
             // iterate through each document to determine the closeness of the each title compared to keywrods
             for (let i = 0; i < manifest.length; i++) {
@@ -136,15 +167,18 @@ exports.handler = function (context, event, callback) {
             // return documents according to intersection or union arrays
             if (keep_unions === false) {
                 // this is exact intersection set
+                const intersections2 = intersections.slice(0, MAX_RESULTS);  // truncate results to avoid unable to respond
                 lines.push("We found exact matches to your keywords! ");
+                lines.push("");
+                lines.push(`We found ${intersections.length} matches. Showing ${intersections2.length}.`);
                 lines.push("");
                 lines.push("Here are the results: ");
                 lines.push("");
                 lines.push("------------------------");
-                for (let i = 0; i < intersections.length; i++) {
+                for (let i = 0; i < intersections2.length; i++) {
                     lines.push("");
-                    lines.push(`Name: ${intersections[i].name}`);
-                    lines.push(`Link: ${intersections[i].url}`);
+                    lines.push(`Name: ${intersections2[i].name}`);
+                    lines.push(`Link: ${intersections2[i].url}`);
 
                 }
                 lines.push("");

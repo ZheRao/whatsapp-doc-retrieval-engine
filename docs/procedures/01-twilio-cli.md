@@ -68,6 +68,27 @@ for f in *.pdf; do
 done
 ```
 
+# Delete the old asset (Do Not Work Before 7 Days Since Upload)
+
+*(Consult `docs/constraints/07-deleting-assets.md` for more detail)*
+
+**1) Find the old asset's SID**
+
+Find the information in `assets_meta.private.js` — *search for the old file name*
+
+Record:
+- `asset_sid`: ZH...
+- `service_sid`: ZS...
+
+**2) Delete the asset by SID**
+
+```bash
+twilio api:serverless:v1:services:assets:remove \
+  --service-sid ZS... \
+  --sid ZH...
+```
+
+
 # "Nuke" a Twilio Assets Service (Danger Zone)
 
 Use this when a service is corrumpted / wrong structure / you want a clean reset.
@@ -92,7 +113,7 @@ twilio api:serverless:v1:services:functions:list --service-sid ZS...
 twilio api:serverless:v1:services:remove --sid ZS....
 ```
 
-**4) Remove local cached pointers to the old SID**
+**4) Remove local cached pointers to the old SID** — *(if can't delete the service)*
 
 Search your machine for the old SID:
 
